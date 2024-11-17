@@ -569,7 +569,7 @@ function hideErrorAfterTimeout(element) {
 
     async function getApprovedMember(collection){
         try{
-            const response = await fetch(url+"/api/v1/get_approved_users");
+            const response = await fetch(url+'/api/v1/get_approved_users');
             const responseJson = await response.json();
             if(collection=="student"){
                 return responseJson[0];
@@ -884,7 +884,7 @@ function hideErrorAfterTimeout(element) {
    async function displayApprovedStaff() {
         const approvedStaff = await getApprovedMember('teacher');
        const tbody = document.querySelector('#approvedStaff tbody');
-       console.table(approveStaff);
+       console.table(approvedStaff);
        tbody.innerHTML = ''; // Clear existing entries
    
        approvedStaff.forEach((staffMember, index) => {

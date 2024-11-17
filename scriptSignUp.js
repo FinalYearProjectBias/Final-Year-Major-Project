@@ -1,3 +1,4 @@
+const url='https://backend-server-ohpm.onrender.com'
 function toggleForm() {
     var role = document.getElementById("role").value;
     document.getElementById("student-form").style.display = "none";
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorElement.style.display = 'none';
     });
     document.querySelectorAll('.signup-form').forEach(form => {
-        form.addEventListener('submit', function (e) {
+        form.addEventListener('submit',async function (e) {
             e.preventDefault(); // Prevent default form submission
             
             const role = document.getElementById("role").value; // Get the selected role dynamically
@@ -27,46 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Roll number uniqueness check for students
             const rollNo = document.getElementById('roll-no')?.value.trim();
             
-            if (role === 'student') {
-                const existingStudents = JSON.parse(localStorage.getItem('students') || '[]');
-                
+            if (role === 'student') {                
                 // Roll number uniqueness check
-                const isRollNoTaken = existingStudents.some(student => student.roll_no === rollNo);
-                if (isRollNoTaken) {
-                    // Show error message if roll number is already taken
-                    const rollNoError = document.getElementById('roll-no-error');
-                    rollNoError.style.display = 'block'; // Show the error message
-                    rollNoError.textContent = "This Roll Number is already taken. Please choose a different one.";
-                    hideErrorAfterTimeout(rollNoError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
+                
 
-                // Email uniqueness check
-                const email = document.getElementById('email').value.trim();
-                const isEmailTaken = existingStudents.some(student => student.email === email);
-                if (isEmailTaken) {
-                    // Show error message if email is already taken
-                    const emailError = document.getElementById('email-error');
-                    emailError.style.display = 'block'; // Show the error message
-                    emailError.textContent = "This email is already in use. Please enter a different email.";
-                    hideErrorAfterTimeout(emailError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
-
-                // Contact Number uniqueness check
-                const contactNumber = document.getElementById('contact-number').value.trim();
-                const isContactNumberTaken = existingStudents.some(student => student.mobile_no === contactNumber);
-                if (isContactNumberTaken) {
-                    // Show error message if contact number is already taken
-                    const contactNumberError = document.getElementById('contact-number-error');
-                    contactNumberError.style.display = 'block'; // Show the error message
-                    contactNumberError.textContent = "This contact number is already in use. Please enter a different number.";
-                    hideErrorAfterTimeout(contactNumberError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
-
+                
+                const contact_number=document.getElementById('contact-number').value;
+                console.log(contact_number);
                 // Validate contact number (exactly 10 digits)
-                if (contactNumber.length !== 10 || isNaN(contactNumber)) {
+                if (contact_number.length !== 10 || isNaN(contact_number)) {
                     const contactNumberError = document.getElementById('contact-number-error');
                     contactNumberError.style.display = 'block';
                     contactNumberError.textContent = "Please enter a valid 10-digit contact number.";
@@ -80,43 +50,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 const course = document.getElementById('course').value;
                 const batch = document.getElementById('batch').value;
                 const password = document.getElementById('password').value;
+                const email=document.getElementById('email').value;
 
-                const studentData = { name, gender, course, batch, roll_no: rollNo, email, mobile_no: contactNumber, password, role: 'student' };
-                
+                const studentData = { name, gender, course, batch, roll_no: rollNo, email, contact_number, password,user_type:'student'};
+                console.log(studentData);
                 // Safely parse and update localStorage with new student data
-                existingStudents.push(studentData);
-                localStorage.setItem('students', JSON.stringify(existingStudents));
+                const response = await fetch('https://backend-server-ohpm.onrender.com/api/v1/student/signup/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(studentData),
+                });
+                console.log(studentData);
+                console.log(await response.json());
              }
              
              
              else if (role === 'teacher') {
-                // Handle teacher data
-                const existingTeachers = JSON.parse(localStorage.getItem('teachers') || '[]');
-
-                
                 // Email uniqueness check
                 const email = document.getElementById('teacher-email').value.trim()
-                const isEmailTaken = existingTeachers.some(teacher => teacher.email === email);
-                if (isEmailTaken) {
-                    // Show error message if email is already taken
-                    const teacheremailError = document.getElementById('teacher-email-error');
-                    teacheremailError.style.display = 'block'; // Show the error message
-                    teacheremailError.textContent = "This email is already in use. Please enter a different email.";
-                    hideErrorAfterTimeout(teacheremailError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
-
                 // Contact Number uniqueness check
                 const mobile_no = document.getElementById('teacher-contact').value.trim();
-                const isContactNumberTaken = existingTeachers.some(teacher => teacher.mobile_no === mobile_no);
-                if (isContactNumberTaken) {
-                    // Show error message if contact number is already taken
-                    const teacherContactError = document.getElementById('teacher-contact-error');
-                    teacherContactError.style.display = 'block'; // Show the error message
-                    teacherContactError.textContent = "This contact number is already in use. Please enter a different number.";
-                    hideErrorAfterTimeout(teacherContactError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
+                
 
                 // Validate contact number (exactly 10 digits)
                 if (mobile_no.length !== 10 || isNaN(mobile_no)) {
@@ -134,42 +90,34 @@ document.addEventListener('DOMContentLoaded', () => {
               
                 const password = document.getElementById('teacher-password').value;
 
-                const teacherData = { name, gender, department, designation, email, mobile_no, role: 'teacher',password };
+                const teacherData = { name, gender, department, designation, email, contact_number:mobile_no, user_type:'teacher',password };
                 // Safely parse localStorage data
             
-                existingTeachers.push(teacherData);
-                localStorage.setItem('teachers', JSON.stringify(existingTeachers));
+                console.log(teacherData);
+                // Safely parse and update localStorage with new student data
+                const response = await fetch('https://backend-server-ohpm.onrender.com/api/v1/faculty/signup/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(teacherData),
+                });
+                console.log(teacherData);
+                console.log(await response.json());
 
             } 
             
             else if (role === 'staff') {
-                // Handle staff data
-                const existingStaff = JSON.parse(localStorage.getItem('staff') || '[]');
                 
                 // Email uniqueness check
+                
                 const email = document.getElementById('staff-email').value;
-                const isEmailTaken = existingStaff.some(staffMember => staffMember.email === email);
-                if (isEmailTaken) {
-                    // Show error message if email is already taken
-                    const staffemailError = document.getElementById('staff-email-error');
-                    staffemailError.style.display = 'block'; // Show the error message
-                    staffemailError.textContent = "This email is already in use. Please enter a different email.";
-                    hideErrorAfterTimeout(staffemailError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
+
+                
 
                 // Contact Number uniqueness check
                 const mobile_no = document.getElementById('staff-contact').value;
-                const isContactNumberTaken = existingStaff.some(teacher => teacher.mobile_no === mobile_no);
-                if (isContactNumberTaken) {
-                    // Show error message if contact number is already taken
-                    const staffContactError = document.getElementById('staff-contact-error');
-                    staffContactError.style.display = 'block'; // Show the error message
-                    staffContactError.textContent = "This contact number is already in use. Please enter a different number.";
-                    hideErrorAfterTimeout( staffContactError); // Hide after 2 seconds
-                    return; // Prevent form submission
-                }
-
+                
                 // Validate contact number (exactly 10 digits)
                 if (mobile_no.length !== 10 || isNaN(mobile_no)) {
                     const  staffContactError = document.getElementById('staff-contact-error');
@@ -185,11 +133,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const designation = document.getElementById('staff-designation').value;
                 const password = document.getElementById('staff-password').value;
 
-                const staffData = { name, gender, department, designation, email, mobile_no, role: 'staff',password };
+                const staffData = { name, gender, department, designation, email,contact_number: mobile_no, user_type: 'staff',password };
+
+                
                 // Safely parse localStorage data
+                const response = await fetch('https://backend-server-ohpm.onrender.com/api/v1/faculty/signup/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(staffData),
+                });
+                console.log(staffData);
+                console.log(await response.json());
               
-                existingStaff.push(staffData);
-                localStorage.setItem('staff', JSON.stringify(existingStaff));
             }
 
             // Display success message and handle redirection
