@@ -1,3 +1,5 @@
+const url='https://backend-server-ohpm.onrender.com'
+
 document.addEventListener('DOMContentLoaded', () => {
     // Handle dropdown functionality
     document.querySelectorAll('.dropdown').forEach(dropdown => {
@@ -565,21 +567,61 @@ function hideErrorAfterTimeout(element) {
     // Populate the table on page load (if you want to add some initial data, you can do it here)
     document.addEventListener('DOMContentLoaded', populateTable);
 
+    async function getApprovedMember(collection){
+        try{
+            const response = await fetch(url+"/api/v1/get_approved_users");
+            const responseJson = await response.json();
+            if(collection=="student"){
+                return responseJson[0];
+            }
+            else if(collection=="teacher"){
+                return responseJson[1];
+            }
+            else{
+                return responseJson[2];
+            }
+        }
+        catch(error){
+            console.log("error");
+            alert(`${error} caused failure`);
+        }
+
+    }
 
 
 
 
+    async function getNotApprovedMember(collection){
+        try{
+            const response = await fetch(url+"/api/v1/admin/get_pending_approval_users");
+            const responseJson = await response.json();
+            if(collection=="student"){
+                return responseJson[0];
+            }
+            else if(collection=="teacher"){
+                return responseJson[1];
+            }
+            else{
+                return responseJson[2];
+            }
+        }
+        catch(error){
+            console.log("error");
+            alert(`${error} caused failure`);
+        }
 
-
+    }
 
     
 
      // Function to display pending students
-     function displayStudents() {
-        const students = JSON.parse(localStorage.getItem('students')) || [];
+     async function displayStudents() {
+        const students = await getNotApprovedMember("student");
+        console.table(students);
         const tbody = document.querySelector('#studentTable tbody');
+        
         tbody.innerHTML = ''; // Clear existing entries
-   
+        
         students.forEach((student, index) => {
            const row = document.createElement('tr');
            row.innerHTML = `
@@ -590,7 +632,7 @@ function hideErrorAfterTimeout(element) {
                <td>${student.batch}</td>
                <td>${student.roll_no}</td>
                <td>${student.email}</td>
-               <td>${student.mobile_no}</td>
+               <td>${student.contact_number}</td>
                <td>
                    <button class="approveStudentBtn" data-index="${index}">Approve</button>
                    <button class="deleteStudentBtn" data-index="${index}">Delete</button>
@@ -616,8 +658,9 @@ function hideErrorAfterTimeout(element) {
    }
    
    // Function to display approved students
-   function displayApprovedStudents() {
-       const approvedStudents = JSON.parse(localStorage.getItem('approvedStudents')) || [];
+   async function displayApprovedStudents() {
+       const approvedStudents = await getApprovedMember("student");
+       console.table(approvedStudents);
        const tbody = document.querySelector('#approvedStudents tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -631,7 +674,7 @@ function hideErrorAfterTimeout(element) {
                <td>${student.batch}</td>
                <td>${student.roll_no}</td>
                <td>${student.email}</td>
-               <td>${student.mobile_no}</td>
+               <td>${student.contact_number}</td>
                <td><button class="deleteStudentBtn" data-index="${index}">Delete</button></td>
            `;
            tbody.appendChild(row);
@@ -679,8 +722,9 @@ function hideErrorAfterTimeout(element) {
    
    
    // Function to display pending teachers
-   function displayTeachers() {
-       const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+   async function displayTeachers() {
+       const teachers = await getNotApprovedMember('teacher');
+       console.table(teachers);
        const tbody = document.querySelector('#teacherTable tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -724,8 +768,8 @@ function hideErrorAfterTimeout(element) {
    }
    
    // Function to display approved teachers
-   function displayApprovedTeachers() {
-       const approvedTeachers = JSON.parse(localStorage.getItem('approvedTeachers')) || [];
+   async function displayApprovedTeachers() {
+       const approvedTeachers = await getNotApprovedMember('teacher');
        const tbody = document.querySelector('#approvedTeachers tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -797,8 +841,8 @@ function hideErrorAfterTimeout(element) {
    
    
    // Function to display pending staff
-   function displayStaff() {
-       const staff = JSON.parse(localStorage.getItem('staff')) || [];
+   async function displayStaff() {
+    const staff = await getNotApprovedMember('staff');
        const tbody = document.querySelector('#staffTable tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -836,9 +880,11 @@ function hideErrorAfterTimeout(element) {
        });
    }
    // Function to display approved staff
-   function displayApprovedStaff() {
-       const approvedStaff = JSON.parse(localStorage.getItem('approvedStaff')) || [];
+
+   async function displayApprovedStaff() {
+        const approvedStaff = await getApprovedMember('teacher');
        const tbody = document.querySelector('#approvedStaff tbody');
+       console.table(approveStaff);
        tbody.innerHTML = ''; // Clear existing entries
    
        approvedStaff.forEach((staffMember, index) => {
