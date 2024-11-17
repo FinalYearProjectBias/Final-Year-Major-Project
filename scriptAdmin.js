@@ -769,7 +769,7 @@ function hideErrorAfterTimeout(element) {
    
    // Function to display approved teachers
    async function displayApprovedTeachers() {
-       const approvedTeachers = await getNotApprovedMember('teacher');
+       const approvedTeachers = await getApprovedMember('teacher');
        const tbody = document.querySelector('#approvedTeachers tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
