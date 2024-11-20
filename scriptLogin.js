@@ -152,7 +152,7 @@ async function displayGrievances() {
     const responseJson = await response.json();
     const grievances=responseJson.data;
     console.log(grievances);
-    localStorage.setItem(grievances);
+    localStorage.setItem("grievances",JSON.stringify(grievances));
     // Check if there are no grievances
     
 
@@ -173,8 +173,10 @@ async function displayGrievances() {
     // Add event listeners to the View buttons
     document.querySelectorAll('.view-button').forEach(button => {
         button.addEventListener('click', function() {
-            const grievance = this.getAttribute('data-index');
-            console.log(grievance);
+            const index = this.getAttribute('data-index');
+            const grievances = JSON.parse(localStorage.getItem('grievances') || '[]');
+            const grievance = grievances[index];
+            console.log(grievance)
             showGrievanceModal(grievance);
         });
     });
@@ -190,9 +192,9 @@ function showGrievanceModal(grievance) {
     document.getElementById('modal-status').innerText = grievance.responded?'Replied':'Not Replied';
 
     // Display all replies in chronological order
-    const allReplies = grievance.reply;
+    const allReplies = grievance.reply||'N/A';
     let contentHtml = '';
-    contentHtml += `<strong>${grievance.user}:</strong> ${grievance.date}<br>${allReplies}<br><br>`;
+    contentHtml += `${grievance.date}<br>${allReplies}<br><br>`;
     
 
     // If there are no replies yet
