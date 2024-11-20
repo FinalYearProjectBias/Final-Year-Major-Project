@@ -97,36 +97,36 @@ function getStorageKey(userType) {
 
 
 // const nam =document.getElementById('Name');
-document.getElementById('post-grievance-form').addEventListener('submit', function(event) {
+document.getElementById('post-grievance-form').addEventListener('submit', async function(event) {
     event.preventDefault(); // Prevent the default form submission
 
-    // Collect form data
-    const grievantType = document.getElementById('grievant-type').value;
-    const grievantName = document.getElementById('grievant-name').value;
-    const grievanceTitle = document.getElementById('grievance-title').value;
-    const grievanceDescription = document.getElementById('grievance-description').value;
+    // Collect form dtt grievantType = document.getElementById('grievant-type').value;
+    const name = document.getElementById('grievant-name').value;
+    const title = document.getElementById('grievance-title').value;
+    const description = document.getElementById('grievance-description').value;
+    const user_ref=localStorage.getItem('user_id');
+    const type=document.getElementById('grievant-type').value;
+
 
     // Create a unique grievance number and current date (dd-mm-yyyy format)
-    const grievanceNumber = 'CPN-' + Math.floor(10000 + Math.random() * 9000000) + 1; // Unique grievance number
-    const grievantID = 'GR-' + Math.floor(100000 + Math.random() * 9000000); // Unique grievant ID
-    const grievanceDate = new Date().toLocaleDateString('en-GB'); // Get current date in dd-mm-yyyy format
+    
+    const date = new Date().toLocaleDateString('en-GB'); // Get current date in dd-mm-yyyy format
 
     // Create a grievance object with all data
-    const grievanceData = { grievantType, grievantName, grievanceTitle, grievanceDescription, grievanceNumber, grievanceDate, grievantID, status: 'Open' };
-
-    // Retrieve existing grievances from localStorage
-    const existingGrievances = JSON.parse(localStorage.getItem('grievances') || '[]');
-
-    // Add the new grievance to the array
-    existingGrievances.push(grievanceData);
-
-    // Save the updated grievances array back to localStorage
-    localStorage.setItem('grievances', JSON.stringify(existingGrievances));
-
-    // Display the success message
-    document.getElementById('post-grievance-success').style.display = 'block';
-
-    // Optionally, reset the form fields
+    const grievanceData = { type, name, title, description, date,user_ref };
+    console.log(grievanceData);
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/user/add_grievance/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(grievanceData)
+                });
+   if(!response.ok){
+    console.log(await response.json());
+   }
+   else{
+    console.log(await response.json());
     this.reset();
 
     // Optionally, hide the success message after a few seconds
@@ -136,31 +136,35 @@ document.getElementById('post-grievance-form').addEventListener('submit', functi
 
     // Refresh the grievances table to show the new grievance
     displayGrievances();
+   }
+    
 });
 
 // Function to display grievances
-function displayGrievances() {
+async function displayGrievances() {
     const tbody = document.querySelector('#my-grievance-table tbody');
     tbody.innerHTML = ''; // Clear existing rows
-
+    const user_ref=localStorage.getItem('user_id');
     // Retrieve grievances from local storage
-    const storedGrievances = JSON.parse(localStorage.getItem('grievances') || '[]');
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/user/get_grievances/${user_ref}`);
+        if (!response.ok) throw new Error('Failed to fetch grievances');
 
+    const responseJson = await response.json();
+    const grievances=responseJson.data;
+    console.log(grievances);
+    localStorage.setItem(grievances);
     // Check if there are no grievances
-    if (storedGrievances.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No grievances posted yet.</td></tr>';
-        return;
-    }
+    
 
     // Iterate over each grievance and insert it into the table
-    storedGrievances.forEach((grievance, index) => {
+    grievances.forEach((grievance, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${grievance.grievantID}</td>
-            <td>${grievance.grievanceTitle}</td>
-            <td>${grievance.grievanceDescription}</td>
-            <td>${grievance.status}</td>
+            <td>${grievance.ack_number}</td>
+            <td>${grievance.title}</td>
+            <td>${grievance.description}</td>
+            <td>${grievance.responded?'Replied':'Not Replied'}</td>
             <td><button class="view-button" style="color: white; background-color: #1abc9c; padding: 5px; border: none; border-radius: 4px; cursor: pointer;" data-index="${index}">View</button></td>
         `;
         tbody.appendChild(row);
@@ -169,33 +173,30 @@ function displayGrievances() {
     // Add event listeners to the View buttons
     document.querySelectorAll('.view-button').forEach(button => {
         button.addEventListener('click', function() {
-            const grievanceIndex = this.getAttribute('data-index');
-            showGrievanceModal(storedGrievances[grievanceIndex]);
+            const grievance = this.getAttribute('data-index');
+            console.log(grievance);
+            showGrievanceModal(grievance);
         });
     });
 }
 
 function showGrievanceModal(grievance) {
-    document.getElementById('modal-grievant-id').innerText = grievance.grievantID;
-    document.getElementById('modal-grievant-name').innerText = grievance.grievantName || 'N/A';
-    document.getElementById('modal-title').innerText = grievance.grievanceTitle;
-    document.getElementById('modal-description').innerText = grievance.grievanceDescription;
-    document.getElementById('modal-date').innerText = grievance.grievanceDate || 'N/A';
-    document.getElementById('modal-status').innerText = grievance.status;
+    console.log(grievance);
+    document.getElementById('modal-grievant-id').innerText = grievance.ack_number;
+    document.getElementById('modal-grievant-name').innerText = grievance.name || 'N/A';
+    document.getElementById('modal-title').innerText = grievance.title;
+    document.getElementById('modal-description').innerText = grievance.description;
+    document.getElementById('modal-date').innerText = grievance.date || 'N/A';
+    document.getElementById('modal-status').innerText = grievance.responded?'Replied':'Not Replied';
 
     // Display all replies in chronological order
-    const allReplies = grievance.replies || [];
+    const allReplies = grievance.reply;
     let contentHtml = '';
-
-    allReplies.forEach(reply => {
-        const { user, date, message } = reply;
-        contentHtml += `<strong>${user}:</strong> ${date}<br>${message}<br><br>`;
-    });
+    contentHtml += `<strong>${grievance.user}:</strong> ${grievance.date}<br>${allReplies}<br><br>`;
+    
 
     // If there are no replies yet
-    if (allReplies.length === 0) {
-        contentHtml = 'No replies yet';
-    }
+    
 
     document.getElementById('modal-reply').innerHTML = contentHtml;
 
@@ -209,7 +210,7 @@ function showGrievanceModal(grievance) {
     };
 
     document.getElementById('satisfied-button').onclick = function() {
-        updateGrievanceStatus(grievance.grievantID, 'Satisfied');
+        updateGrievanceStatus(grievance.ack_number, 'Satisfied');
     };
 
     // Handle feedback submission

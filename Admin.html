@@ -598,7 +598,7 @@ document.getElementById('submit-reply').addEventListener('click', async function
         document.getElementById('modal-overlay').style.display = 'none';
         document.getElementById('reply-success').style.display = 'none'; // Hide success message for future
     }, 2000);
-
+displayGrievances()
         } catch (error) {
             console.error("Failed to reply to grievance:", error);
             throw error;
