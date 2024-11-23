@@ -617,7 +617,6 @@ function hideErrorAfterTimeout(element) {
      // Function to display pending students
      async function displayStudents() {
         const students = await getNotApprovedMember("student");
-        console.table(students);
         const tbody = document.querySelector('#studentTable tbody');
         
         tbody.innerHTML = ''; // Clear existing entries
@@ -634,8 +633,8 @@ function hideErrorAfterTimeout(element) {
                <td>${student.email}</td>
                <td>${student.contact_number}</td>
                <td>
-                   <button class="approveStudentBtn" data-index="${index}">Approve</button>
-                   <button class="deleteStudentBtn" data-index="${index}">Delete</button>
+                   <button class="approveStudentBtn" data-index="${student.user_id}" data-type="student">Approve</button>
+                   <button class="deleteStudentBtn" data-index="${student.user_id}">Delete</button>
                </td>
            `;
            tbody.appendChild(row);
@@ -644,8 +643,10 @@ function hideErrorAfterTimeout(element) {
        // Attach event listeners for the buttons
        document.querySelectorAll('.approveStudentBtn').forEach(button => {
            button.addEventListener('click', function () {
-               const index = this.dataset.index;
-               approveStudent(index);
+               const index = this.getAttribute('data-index');
+               const type=this.getAttribute('data-type')
+               console.log(`${index},${type}`);
+               approveStudent(index,type);
            });
        });
    
@@ -660,7 +661,7 @@ function hideErrorAfterTimeout(element) {
    // Function to display approved students
    async function displayApprovedStudents() {
        const approvedStudents = await getApprovedMember("student");
-       console.table(approvedStudents);
+      
        const tbody = document.querySelector('#approvedStudents tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -675,7 +676,7 @@ function hideErrorAfterTimeout(element) {
                <td>${student.roll_no}</td>
                <td>${student.email}</td>
                <td>${student.contact_number}</td>
-               <td><button class="deleteStudentBtn" data-index="${index}">Delete</button></td>
+               <td><button class="deleteStudentBtn" data-index="${student.user_id}">Delete</button></td>
            `;
            tbody.appendChild(row);
        });
@@ -683,7 +684,7 @@ function hideErrorAfterTimeout(element) {
        document.querySelectorAll('.deleteStudentBtn').forEach(button => {
            button.addEventListener('click', function () {
                const index = this.dataset.index;
-               deleteApprovedStudent(index);
+               deleteStudent(index);
            });
        });
    }
@@ -697,23 +698,23 @@ function hideErrorAfterTimeout(element) {
    }
    
    // Function to delete approved student
-   function deleteApprovedStudent(index) {
-       const approvedStudents = JSON.parse(localStorage.getItem('approvedStudents')) || [];
-       approvedStudents.splice(index, 1);
-       localStorage.setItem('approvedStudents', JSON.stringify(approvedStudents));
-       displayApprovedStudents();
-   }
+
    
    // Function to approve a student
-   function approveStudent(index) {
-       const students = JSON.parse(localStorage.getItem('students')) || [];
-       const approvedStudents = JSON.parse(localStorage.getItem('approvedStudents')) || [];
-       const approvedStudent = students.splice(index, 1)[0]; // Move student to approved list
-       approvedStudents.push(approvedStudent);
-   
-       // Save updated data to localStorage
-       localStorage.setItem('students', JSON.stringify(students));
-       localStorage.setItem('approvedStudents', JSON.stringify(approvedStudents));
+   async function approveStudent(index,type) {
+    const userData={
+        "user_id":index,
+        "user_type":type,
+        "approved":true
+    }
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/admin/approve_user/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
    
        // Refresh both tables
        displayStudents();
@@ -724,7 +725,6 @@ function hideErrorAfterTimeout(element) {
    // Function to display pending teachers
    async function displayTeachers() {
        const teachers = await getNotApprovedMember('teacher');
-       console.table(teachers);
        const tbody = document.querySelector('#teacherTable tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -741,8 +741,8 @@ function hideErrorAfterTimeout(element) {
                    <td>${teacher.email || 'N/A'}</td>
                    <td>${teacher.mobile_no || 'N/A'}</td>
                    <td>
-                       <button class="approveTeacherBtn" data-index="${index}">Approve</button>
-                       <button class="deleteTeacherBtn" data-index="${index}">Delete</button>
+                       <button class="approveTeacherBtn" data-index="${teacher.user_id}"">Approve</button>
+                       <button class="deleteTeacherBtn" data-index="${teacher.user_id}">Delete</button>
                    </td>
                `;
                tbody.appendChild(row);
@@ -754,7 +754,7 @@ function hideErrorAfterTimeout(element) {
        // Attach event listeners for the buttons
        document.querySelectorAll('.approveTeacherBtn').forEach(button => {
            button.addEventListener('click', function () {
-               const index = this.dataset.index;
+               const index = this.getAttribute('data-index');
                approveTeacher(index);
            });
        });
@@ -785,7 +785,7 @@ function hideErrorAfterTimeout(element) {
                    <td>${teacher.designation || 'N/A'}</td>
                    <td>${teacher.email || 'N/A'}</td>
                    <td>${teacher.mobile_no || 'N/A'}</td>
-                   <td><button class="deleteTeacherBtn" data-index="${index}">Delete</button></td>
+                   <td><button class="deleteTeacherBtn" data-index="${teacher.user_id}">Delete</button></td>
                `;
                tbody.appendChild(row);
            } else {
@@ -795,48 +795,59 @@ function hideErrorAfterTimeout(element) {
    
        document.querySelectorAll('.deleteTeacherBtn').forEach(button => {
            button.addEventListener('click', function () {
-               const index = this.dataset.index;
-               deleteApprovedTeacher(index);
+               const index = this.getAttribute('data-index');
+               const type = 'teacher';
+                console.log(index);
+               deleteTeacher(index,type);
            });
        });
    }
    
    // Function to approve a teacher
-   function approveTeacher(index) {
-       const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
-       const approvedTeachers = JSON.parse(localStorage.getItem('approvedTeachers')) || [];
+   async function approveTeacher(index,type) {
+    const userData={
+        "user_id":index,
+        "user_type":"teacher",
+        "approved":true
+    }
+    console.log(userData);
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/admin/approve_user/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
    
-       if (teachers[index]) { // Ensure the teacher exists before trying to approve
-           const approvedTeacher = teachers.splice(index, 1)[0]; // Move teacher to approved list
-           approvedTeachers.push(approvedTeacher);
-   
-           // Save updated data to localStorage
-           localStorage.setItem('teachers', JSON.stringify(teachers));
-           localStorage.setItem('approvedTeachers', JSON.stringify(approvedTeachers));
-   
-           // Refresh both tables
-           displayTeachers();
-           displayApprovedTeachers();
-       } else {
-           console.error('No teacher found at index ${index}'); // Log an error if no teacher is found
-       }
+       // Refresh both tables
+       displayTeachers();
+       displayApprovedTeachers();
    }
    
    // Function to delete a teacher
-   function deleteTeacher(index) {
-       const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
-       teachers.splice(index, 1);
-       localStorage.setItem('teachers', JSON.stringify(teachers));
+   async function deleteTeacher(index) {
+    const userData={
+        "user_id":index,
+        "user_type":'teacher',
+        "approved":false
+    }
+    console.log(userData);
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/admin/approve_user/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
+
+       displayApprovedTeachers();
        displayTeachers(); // Refresh the displayed list
    }
    
    // Function to delete approved teacher
-   function deleteApprovedTeacher(index) {
-       const approvedTeachers = JSON.parse(localStorage.getItem('approvedTeachers')) || [];
-       approvedTeachers.splice(index, 1);
-       localStorage.setItem('approvedTeachers', JSON.stringify(approvedTeachers));
-       displayApprovedTeachers();
-   }
+  
    
    
    
@@ -857,8 +868,8 @@ function hideErrorAfterTimeout(element) {
                <td>${staffMember.email || 'N/A'}</td>
                <td>${staffMember.mobile_no || 'N/A'}</td>
                <td>
-                   <button class="approveStaffBtn" data-index="${index}">Approve</button>
-                   <button class="deleteStaffBtn" data-index="${index}">Delete</button>
+                   <button class="approveStaffBtn" data-index="${staffMember.user_id}">Approve</button>
+                   <button class="deleteStaffBtn" data-index="${staffMember.user_id}">Delete</button>
                </td>
            `;
            tbody.appendChild(row);
@@ -884,7 +895,6 @@ function hideErrorAfterTimeout(element) {
    async function displayApprovedStaff() {
         const approvedStaff = await getApprovedMember('teacher');
        const tbody = document.querySelector('#approvedStaff tbody');
-       console.table(approvedStaff);
        tbody.innerHTML = ''; // Clear existing entries
    
        approvedStaff.forEach((staffMember, index) => {
@@ -899,7 +909,7 @@ function hideErrorAfterTimeout(element) {
                    <td>${staffMember.designation || 'N/A'}</td>
                    <td>${staffMember.email || 'N/A'}</td>
                    <td>${staffMember.mobile_no || 'N/A'}</td>
-                   <td><button class="deleteStaffBtn" data-index="${index}">Delete</button></td>
+                   <td><button class="deleteStaffBtn" data-index="${staffMember.user_ref}">Delete</button></td>
                `;
                tbody.appendChild(row);
            } else {
@@ -910,35 +920,50 @@ function hideErrorAfterTimeout(element) {
        document.querySelectorAll('.deleteStaffBtn').forEach(button => {
            button.addEventListener('click', function () {
                const index = this.dataset.index;
-               deleteApprovedStaff(index);
+               deleteStaff(index);
            });
        });
    }
    
    // Function to delete a staff member
-   function deleteStaff(index) {
-       const staff = JSON.parse(localStorage.getItem('staff')) || [];
-       staff.splice(index, 1);
-       localStorage.setItem('staff', JSON.stringify(staff));
-       displayStaff(); // Refresh the displayed list
-   }
+   async function deleteStaff(index) {
+       const userData={
+        "user_id":index,
+        "user_type":"staff",
+        "approved":false
+    }
+    console.log(userData);
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/admin/approve_user/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
    
-   // Function to delete approved staff member
-   function deleteApprovedStaff(index) {
-       const approvedStaff = JSON.parse(localStorage.getItem('approvedStaff')) || [];
-       approvedStaff.splice(index, 1);
-       localStorage.setItem('approvedStaff', JSON.stringify(approvedStaff));
+       // Refresh both tables
+       displayStaff();
        displayApprovedStaff();
+       
    }
-   function approveStaff(index) {
-       const staff = JSON.parse(localStorage.getItem('staff')) || [];
-       const approvedStaff= JSON.parse(localStorage.getItem('approvedStaff')) || [];
-       const approvedStaffMember = staff.splice(index, 1)[0]; // Move student to approved list
-       approvedStaff.push(approvedStaffMember);
    
-       // Save updated data to localStorage
-       localStorage.setItem('staff', JSON.stringify(staff));
-       localStorage.setItem('approvedStaff', JSON.stringify(approvedStaff));
+   
+   async function approveStaff(index) {
+    const userData={
+        "user_id":index,
+        "user_type":'staff',
+        "approved":true
+    }
+    console.log(userData);
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/admin/approve_user/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
    
        // Refresh both tables
        displayStaff();
