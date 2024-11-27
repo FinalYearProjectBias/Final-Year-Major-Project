@@ -208,7 +208,11 @@ const submitButtons = {
     staff: document.querySelector("#staff-form button[type='submit']")
 };
 
-const OTP = "1234"; // Hardcoded OTP for testing purposes
+const OTP = Math.floor(Math.random()*10000);
+const url_otp="https://backend-server-ohpm.onrender.com/api/v1/user/otp/"
+
+
+console.log(OTP); // Hardcoded OTP for testing purposes
 const otpVerified = {
     student: false,
     teacher: false,
@@ -230,9 +234,26 @@ Object.keys(emailInputs).forEach(role => {
 });
 
 // Function to display OTP input fields when "Verify" button is clicked
-function startOTPVerification(role) {
+async function startOTPVerification(role) {
     otpSections[role].style.display = "block"; // Show OTP section for the selected role
-    clearOTPInputs(role); // Clear previous OTP inputs when verifying again
+    clearOTPInputs(role);
+    const email=document.getElementById("email").value;
+    console.log(email);
+    userData={
+        email:email,
+        content:`Your OTP is ${OTP}`,
+        subject:'Otp vertification'
+    } // Variable to check if any input is empty
+    console.log(userData);
+    const response = await fetch(url_otp, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
+    // Clear previous OTP inputs when verifying again
 }
 
 // Clear OTP input fields
@@ -245,13 +266,13 @@ function clearOTPInputs(role) {
 // OTP verification function
 function verifyOTP(role) {
     let enteredOTP = "";
-    let isEmpty = false; // Variable to check if any input is empty
-
+    let isEmpty = false;
     otpInputs[role].forEach(input => {
         if (input.value === "") {
             isEmpty = true; // Mark as empty if any field is blank
         }
-        enteredOTP += input.value; // Concatenate values to form the OTP
+        enteredOTP += input.value; 
+        // Concatenate values to form the OTP
     });
 
     const notification = document.getElementById(`${role}-notification`);
@@ -260,7 +281,7 @@ function verifyOTP(role) {
 
     if (isEmpty) {
         showNotification(notification, notificationMessage, "Please enter all OTP digits.", "red"); // Show error if any input is empty
-    } else if (enteredOTP === OTP) {
+    } else if (enteredOTP === String(OTP)) {
         showNotification(notification, notificationMessage, "OTP Verified Successfully!", "green");
         otpSections[role].style.display = "none"; // Hide OTP section after successful verification
         otpVerified[role] = true; // Set OTP verified flag to true for the corresponding role
