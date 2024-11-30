@@ -29,16 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault(); // Prevent default form submission
 
         // Get form values
-        const currentPassword = document.getElementById('current-password').value;
+        const password = document.getElementById('current-password').value;
         const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
+        const confirmPassword = document.getElementById('confirm-new-password').value;
 
         // Validate passwords
         if (newPassword !== confirmPassword) {
             alert('New password and confirm password do not match.');
             return;
         }
-        if (currentPassword === newPassword) {
+        if (password === newPassword) {
             alert('New password cannot be the same as the current password.');
             return;
         }
@@ -48,17 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('https://backend-server-ohpm.onrender.com/api/change-password', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token'), // Assuming token is stored in localStorage
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    currentPassword,
-                    newPassword,
+                    password:password,
                 }),
             });
 
             const data = await response.json();
-
+            console.log(await data);
             if (response.ok) {
                 // Handle successful password change
                 alert('Password changed successfully.');
@@ -92,6 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Send the email update request to the backend
                 const response = await fetch('https://backend-server-ohpm.onrender.com/api/change-email/', {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // Ensure JSON format, // Include token for authorization
+                    },
                     body: JSON.stringify({
                         oldEmail: oldEmail,  // Include both old and new emails in the body
                         newEmail: newEmail
