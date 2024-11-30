@@ -285,54 +285,40 @@
             </table>
         </div>
 
-        
-        <!-- Edit User Profile Section -->
+<!-- Edit User Profile Section -->
 <div class="content-section" id="edit-user-profile">
     <h3>Edit User Profile</h3>
-    <form id="edit-profile-form">
-            <div class="form-group">
-            <label for="edit-profile-email">Old Email:</label>
+    <form id="change-profile-form">
+        <!-- Old Email Input -->
+        <div class="form-group">
+            <label for="old-email-input">Old Email:</label>
             <div class="input-container">
                 <i class="fas fa-envelope"></i>
-                <input type="email" id="old-email-input" name="email" placeholder="Enter old email" required>
+                <input type="email" id="old-email-input" name="old-email" placeholder="Enter old email" required>
             </div>
         </div>
 
+        <!-- New Email Input -->
         <div class="form-group">
             <label for="edit-profile-email">New Email:</label>
             <div class="input-container">
                 <i class="fas fa-envelope"></i>
-                <input type="email" id="edit-profile-email" name="email" placeholder="Enter new email" required>
-                <!-- Error Message -->
+                <input type="email" id="edit-profile-email" name="new-email" placeholder="Enter new email" required>
                 <div id="email-error" style="color: red; display: none;"></div>
-                <button type="button" id="verify-email-btn" style="display: none;" onclick="verifyEmail()">Verify</button>
             </div>
         </div>
 
-        <div class="form-group" id="otp-container" style="display: none;">
-            <label for="otp-input">Enter OTP:</label>
-            <div class="otp-input-container" style="display: flex; gap: 10px; align-items: center;">
-                <input type="text" id="otp-1" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp-2" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp-3" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp-4" maxlength="1" class="otp-input" required>
-
-                <!-- Submit OTP button next to the 4th box -->
-                <button type="button" id="submit-otp-btn" onclick="submitOTP()" style="width: 100px; height: 30px;">Submit OTP</button>
-            </div>
-            <div id="otp-error" style="display: none; color: red;">Invalid OTP. Please try again.</div>
-        </div>
-
+        <!-- Submit Button -->
         <div class="form-group">
-            <button type="submit" id="update-profile-btn" style="display: none;" disabled>Update Profile</button>
+            <button type="submit" id="update-profile-btn">Update Email</button>
         </div>
 
+        <!-- Success Message -->
         <div id="edit-profile-success-message" style="color: green; text-align: center; display: none;">
-            Profile updated successfully!
+            Email updated successfully!
         </div>
     </form>
 </div>
-
 
 
 

@@ -311,20 +311,7 @@ function showNotification(notification, notificationMessage, message, color) {
     }, 3000);
 }
 
-// Handle form submission
-Object.keys(submitButtons).forEach(role => {
-    submitButtons[role].addEventListener("click", (event) => {
-        if (!otpVerified[role]) {
-            event.preventDefault(); // Prevent form submission
-            showNotification(
-                document.getElementById(`${role}-notification`),
-                document.getElementById(`${role}-notificationMessage`),
-                "You must verify your email before submitting the form.",
-                "red"
-            ); // Show error message
-        }
-    });
-});
+
 
 // OTP input focus functionality
 Object.keys(otpInputs).forEach(role => {

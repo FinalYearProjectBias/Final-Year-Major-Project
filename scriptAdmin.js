@@ -24,85 +24,107 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle sign-out button click
     document.getElementById('sign-out-btn')?.addEventListener('click', signOut);
 
-    // Handle form submissions
-    function handleFormSubmit(formId, successMessageId) {
-        document.getElementById(formId)?.addEventListener('submit', (event) => {
+    // Change password form submission
+    document.getElementById('change-password-form')?.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        // Get form values
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        // Validate passwords
+        if (newPassword !== confirmPassword) {
+            alert('New password and confirm password do not match.');
+            return;
+        }
+        if (currentPassword === newPassword) {
+            alert('New password cannot be the same as the current password.');
+            return;
+        }
+
+        try {
+            // Send change password request to the backend
+            const response = await fetch('https://backend-server-ohpm.onrender.com/api/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'), // Assuming token is stored in localStorage
+                },
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Handle successful password change
+                alert('Password changed successfully.');
+                document.getElementById('change-password-form').reset();
+            } else {
+                // Handle error messages from the server
+                alert(data.message || 'Failed to change password. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while changing the password. Please try again later.');
+        }
+    });
+
+    // Change email form submission
+ 
+        // Handle form submission to update email
+        document.getElementById('change-profile-form')?.addEventListener('submit', async (event) => {
             event.preventDefault();
-            // Perform form submission logic here
-
-            // Show success message
-            const messageElement = document.getElementById(successMessageId);
-            messageElement.style.display = 'block';
-
-            // Clear the form fields
-            document.getElementById(formId).reset();
-        });
-    }
-document.getElementById('change-password-form')?.addEventListener('submit', (event) => {
-    event.preventDefault(); // Prevent the default form submission
-
-    if (!checkPasswordMatch()) return; // Ensure new passwords match and are valid
-
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-
-    const loggedInUserType = localStorage.getItem('loggedInUserType'); // Get logged-in user type
-
-    // Admin password change logic
-    if (loggedInUserType === 'admin') {
-        const storedPassword = localStorage.getItem('adminPassword'); // Get admin's current password
-
-        if (currentPassword !== storedPassword) {
-            alert('Current password is incorrect!');
-            return; // Prevent changing the password if the current password is wrong
-        }
-
-        // Update the admin password in localStorage
-        localStorage.setItem('adminPassword', newPassword);
-
-        // Show success message
-        showSuccessMessage();
-
-    } 
-    // Grievance member password change logic
-    else if (loggedInUserType === 'grievance-member') {
-        const loggedInEmail = localStorage.getItem('loggedInMemberEmail'); // Get logged-in member's email
-
-        // Fetch the list of members from localStorage
-        const members = JSON.parse(localStorage.getItem('members')) || [];
-
-        // Find the member by their email
-        const member = members.find(m => m.email === loggedInEmail);
-
-        if (!member) {
-            alert('Member not found!');
-            return; // Stop if the member is not found
-        }
-
-        // Check if the current password matches the stored password
-        if (member.password !== currentPassword) {
-            alert('Current password is incorrect!');
-            return; // Stop if the current password is incorrect
-        }
-
-        // Update the member's password
-        member.password = newPassword;
-
-        // Save the updated members list back to localStorage
-        localStorage.setItem('members', JSON.stringify(members));
-
-        // Optionally, update the password in localStorage with the email as the key
-        localStorage.setItem(`password-${loggedInEmail}`, newPassword);
-
-        // Show success message
-        showSuccessMessage();
-    }
     
-    // Clear the form fields
-    document.getElementById('change-password-form').reset();
-});
+            const oldEmail = document.getElementById('old-email-input').value;
+            const newEmail = document.getElementById('edit-profile-email').value;
+            console.log(newEmail)
+            // Validate email format
+            if (!validateEmail(newEmail)) {
+                alert('Invalid new email address.');
+                return;
+            }
+    
+            try {
+                // Send the email update request to the backend
+                const response = await fetch('https://backend-server-ohpm.onrender.com/api/change-email/', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        oldEmail: oldEmail,  // Include both old and new emails in the body
+                        newEmail: newEmail
+                    }),
+                });
+    
+                const data = await response.json();
+                console.log(await data);
+                if (response.ok) {
+                    document.getElementById('edit-profile-success-message').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('edit-profile-success-message').style.display = 'none';
+                    }, 3000); // Hide success message after 3 seconds
+                    document.getElementById('change-profile-form').reset(); // Reset form after submission
+                } else {
+                    throw new Error(data || 'Failed to update email.');
+                }
+            } catch (error) {
+                console.error('Error updating email:', JSON.stringify(error));
+                alert('An error occurred while updating the email. Please try again later.');
+            }
+        });
+    
+        // Function to validate email format
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+    });
+    
 
-});
+
+
  // Sign out function
  function signOut() {
     window.location.href = 'index.html'; // Adjust the URL to match your login page
@@ -204,6 +226,7 @@ async function hideErrorAfterTimeout(element) {
        document.querySelectorAll('.deleteStudentBtn').forEach(button => {
            button.addEventListener('click', function () {
                const index = this.dataset.index;
+               console.log(index);
                deleteStudent(index);
            });
        });
