@@ -208,7 +208,6 @@ async function hideErrorAfterTimeout(element) {
                <td>${student.contact_number}</td>
                <td>
                    <button class="approveStudentBtn" data-index="${student.user_id}" data-type="student">Approve</button>
-                   <button class="deleteStudentBtn" data-index="${student.user_id}">Delete</button>
                </td>
            `;
            tbody.appendChild(row);
@@ -224,13 +223,7 @@ async function hideErrorAfterTimeout(element) {
            });
        });
    
-       document.querySelectorAll('.deleteStudentBtn').forEach(button => {
-           button.addEventListener('click', function () {
-               const index = this.dataset.index;
-               console.log(index);
-               deleteStudent(index);
-           });
-       });
+       
    }
    
    // Function to display approved students
@@ -327,10 +320,9 @@ async function hideErrorAfterTimeout(element) {
                    <td>${teacher.department || 'N/A'}</td>
                    <td>${teacher.designation || 'N/A'}</td>
                    <td>${teacher.email || 'N/A'}</td>
-                   <td>${teacher.mobile_no || 'N/A'}</td>
+                   <td>${teacher.contact_number || 'N/A'}</td>
                    <td>
                        <button class="approveTeacherBtn" data-index="${teacher.user_id}"">Approve</button>
-                       <button class="deleteTeacherBtn" data-index="${teacher.user_id}">Delete</button>
                    </td>
                `;
                tbody.appendChild(row);
@@ -372,7 +364,7 @@ async function hideErrorAfterTimeout(element) {
                    <td>${teacher.department || 'N/A'}</td>
                    <td>${teacher.designation || 'N/A'}</td>
                    <td>${teacher.email || 'N/A'}</td>
-                   <td>${teacher.mobile_no || 'N/A'}</td>
+                   <td>${teacher.contact_number || 'N/A'}</td>
                    <td><button class="deleteTeacherBtn" data-index="${teacher.user_id}">Delete</button></td>
                `;
                tbody.appendChild(row);
@@ -454,10 +446,10 @@ async function hideErrorAfterTimeout(element) {
                <td>${staffMember.department || 'N/A'}</td>
                <td>${staffMember.designation || 'N/A'}</td>
                <td>${staffMember.email || 'N/A'}</td>
-               <td>${staffMember.mobile_no || 'N/A'}</td>
+               <td>${staffMember.contact_number || 'N/A'}</td>
                <td>
                    <button class="approveStaffBtn" data-index="${staffMember.user_id}">Approve</button>
-                   <button class="deleteStaffBtn" data-index="${staffMember.user_id}">Delete</button>
+                  
                </td>
            `;
            tbody.appendChild(row);
@@ -484,7 +476,7 @@ async function hideErrorAfterTimeout(element) {
         const approvedStaff = await getApprovedMember('teacher');
        const tbody = document.querySelector('#approvedStaff tbody');
        tbody.innerHTML = ''; // Clear existing entries
-   
+    
        approvedStaff.forEach((staffMember, index) => {
            // Check if staffMember is defined
            if (staffMember && staffMember.name) {
@@ -496,8 +488,8 @@ async function hideErrorAfterTimeout(element) {
                    <td>${staffMember.department || 'N/A'}</td>
                    <td>${staffMember.designation || 'N/A'}</td>
                    <td>${staffMember.email || 'N/A'}</td>
-                   <td>${staffMember.mobile_no || 'N/A'}</td>
-                   <td><button class="deleteStaffBtn" data-index="${staffMember.user_ref}">Delete</button></td>
+                   <td>${staffMember.contact_number || 'N/A'}</td>
+                   <td><button class="deleteStaffBtn" data-index="${staffMember.user_id}">Delete</button></td>
                `;
                tbody.appendChild(row);
            } else {
@@ -645,7 +637,7 @@ async function hideErrorAfterTimeout(element) {
    
        const staffData = { name, gender, department, designation, email, mobile_no, password };
    
-       // Save the data to local storage
+       // Save the data to local 
        const existingStaff = JSON.parse(localStorage.getItem('staff')) || [];
        existingStaff.push(staffData);
        localStorage.setItem('staff', JSON.stringify(existingStaff));
