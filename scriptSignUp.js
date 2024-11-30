@@ -184,23 +184,6 @@ const verifyButtons = {
     staff: document.getElementById("staff-verifyButton")
 };
 
-const otpSections = {
-    student: document.getElementById("student-otpSection"),
-    teacher: document.getElementById("teacher-otpSection"),
-    staff: document.getElementById("staff-otpSection")
-};
-
-const otpInputs = {
-    student: document.querySelectorAll("#student-otpSection .otp-input"),
-    teacher: document.querySelectorAll("#teacher-otpSection .otp-input"),
-    staff: document.querySelectorAll("#staff-otpSection .otp-input")
-};
-
-const confirmOtpButtons = {
-    student: document.getElementById("student-confirmOtpButton"),
-    teacher: document.getElementById("teacher-confirmOtpButton"),
-    staff: document.getElementById("staff-confirmOtpButton")
-};
 
 const submitButtons = {
     student: document.querySelector("#student-form button[type='submit']"),
@@ -208,97 +191,9 @@ const submitButtons = {
     staff: document.querySelector("#staff-form button[type='submit']")
 };
 
-const OTP = Math.floor(Math.random()*10000);
-const url_otp="https://backend-server-ohpm.onrender.com/api/v1/user/otp/"
-
-
-console.log(OTP); // Hardcoded OTP for testing purposes
-const otpVerified = {
-    student: false,
-    teacher: false,
-    staff: false
-};
 
 // Regular expression for basic email validation
 const emailPattern = /^[^\s@]+@[^\s@]+\.com$/;
-
-// Show the "Verify" button when a valid email is entered
-Object.keys(emailInputs).forEach(role => {
-    emailInputs[role].addEventListener("input", () => {
-        if (emailPattern.test(emailInputs[role].value.trim())) {
-            verifyButtons[role].style.display = "inline"; // Show verify button if email is valid
-        } else {
-            verifyButtons[role].style.display = "none"; // Hide verify button if email is invalid
-        }
-    });
-});
-
-// Function to display OTP input fields when "Verify" button is clicked
-async function startOTPVerification(role) {
-    otpSections[role].style.display = "block"; // Show OTP section for the selected role
-    clearOTPInputs(role);
-    const email=document.getElementById("email").value;
-    console.log(email);
-    userData={
-        email:email,
-        content:`Your OTP is ${OTP}`,
-        subject:'Otp vertification'
-    } // Variable to check if any input is empty
-    console.log(userData);
-    const response = await fetch(url_otp, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData)
-    });
-    console.log(await response.json())
-    // Clear previous OTP inputs when verifying again
-}
-
-// Clear OTP input fields
-function clearOTPInputs(role) {
-    otpInputs[role].forEach(input => {
-        input.value = ""; // Clear each input field
-    });
-}
-
-// OTP verification function
-function verifyOTP(role) {
-    let enteredOTP = "";
-    let isEmpty = false;
-    otpInputs[role].forEach(input => {
-        if (input.value === "") {
-            isEmpty = true; // Mark as empty if any field is blank
-        }
-        enteredOTP += input.value; 
-        // Concatenate values to form the OTP
-    });
-
-    const notification = document.getElementById(`${role}-notification`);
-    const notificationMessage = document.getElementById(`${role}-notificationMessage`);
-    const verifyButton = verifyButtons[role]; // Get the verify button for the role
-
-    if (isEmpty) {
-        showNotification(notification, notificationMessage, "Please enter all OTP digits.", "red"); // Show error if any input is empty
-    } else if (enteredOTP === String(OTP)) {
-        showNotification(notification, notificationMessage, "OTP Verified Successfully!", "green");
-        otpSections[role].style.display = "none"; // Hide OTP section after successful verification
-        otpVerified[role] = true; // Set OTP verified flag to true for the corresponding role
-
-         // Update the verify button text to "Verified" and change its color to orange
-         verifyButton.textContent = "Verified";
-         verifyButton.style.backgroundColor = "orange";
-         verifyButton.style.color = "black"; 
-         verifyButton.style.fontSize = "16px";// Optional: change text color to white for better visibility
-         verifyButton.disabled = true; // Disable the button after verification
-
-        // Enable the Sign Up button after OTP verification
-        submitButtons[role].disabled = false; // Enable Sign Up button only after OTP verification
-    } else {
-        showNotification(notification, notificationMessage, "Invalid OTP. Please try again.", "red");
-    }
-}
 
 // Show notification function
 function showNotification(notification, notificationMessage, message, color) {
@@ -313,33 +208,6 @@ function showNotification(notification, notificationMessage, message, color) {
 
 
 
-// OTP input focus functionality
-Object.keys(otpInputs).forEach(role => {
-    otpInputs[role].forEach((input, index) => {
-        input.addEventListener("keyup", function (e) {
-            if (this.value.length === 1 && index < otpInputs[role].length - 1) {
-                otpInputs[role][index + 1].focus(); // Move to the next input
-            }
 
-            if (Array.from(otpInputs[role]).every(input => input.value !== "")) {
-                confirmOtpButtons[role].removeAttribute("disabled"); // Enable submit OTP button
-            } else {
-                confirmOtpButtons[role].setAttribute("disabled", "true"); // Disable submit OTP button
-            }
-        });
-
-        input.addEventListener("keydown", function (e) {
-            if (e.key === "Backspace" && this.value === "" && index > 0) {
-                otpInputs[role][index - 1].focus(); // Move to the previous input
-            }
-        });
-    });
-});
-
-// // Check OTP verification button for student
-// confirmOtpButtons.student.addEventListener("click", function () {
-//     console.log("Confirm OTP clicked for student");
-//     verifyOTP('student');
-// });
 
 

@@ -265,11 +265,24 @@ async function hideErrorAfterTimeout(element) {
    }
    
    // Function to delete a student
-   function deleteStudent(index) {
-       const students = JSON.parse(localStorage.getItem('students')) || [];
-       students.splice(index, 1);
-       localStorage.setItem('students', JSON.stringify(students));
-       displayStudents(); // Refresh the displayed list
+   async function deleteStudent(index) {
+    const userData={
+        "user_id":index,
+        "user_type":'student',
+        "approved":false
+    }
+    console.log(userData);
+    const response = await fetch(`https://backend-server-ohpm.onrender.com/api/v1/admin/approve_user/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+    console.log(await response.json())
+
+       displayApprovedStudents();
+       displayStudents();  // Refresh the displayed list
    }
    
    // Function to delete approved student

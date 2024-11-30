@@ -42,7 +42,7 @@ document.getElementById('index-form').addEventListener('submit', function(event)
                 window.location.href='/admin.html';
             }
             else{
-            window.location.href = '/Login.html';
+            window.location.href = '/login.html';
             }
         } else {
             // Notify the user of login failure

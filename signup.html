@@ -79,19 +79,7 @@
 
       
 
-     <!-- OTP Verification Section -->
-     <div class="form-group" id="student-otpSection" style="display: none;">
-        <label for="otp">Enter OTP:</label>
-        <div class="otp-wrapper">
-            <div class="otp-group">
-                <input type="text" maxlength="1" class="otp-input" required>
-                <input type="text" maxlength="1" class="otp-input" required>
-                <input type="text" maxlength="1" class="otp-input" required>
-                <input type="text" maxlength="1" class="otp-input" required>
-            </div>
-            <button type="button" id="confirmOtpButton" onclick="verifyOTP('student')">Submit OTP</button>
-        </div>
-    </div>
+  
 
     <div id="student-notification" style="display: none; color: red;">
         <span id="student-notificationMessage"></span>
@@ -157,20 +145,6 @@
             <i class="fas fa-envelope icon"></i>
             <input type="email" id="teacher-email" name="email" placeholder="Enter your email" required>
             <div id="teacher-email-error" class="error-message" style="display:none; color:red;"></div>
-        </div>
-    </div>
-
-    <!-- OTP Verification Section -->
-    <div class="form-group" id="teacher-otpSection" style="display: none;">
-        <label for="otp">Enter OTP:</label>
-        <div class="otp-wrapper">
-            <div class="otp-group">
-                <input type="text" maxlength="1" class="otp-input" required>
-                <input type="text" maxlength="1" class="otp-input" required>
-                <input type="text" maxlength="1" class="otp-input" required>
-                <input type="text" maxlength="1" class="otp-input" required>
-            </div>
-            <button type="button" id="confirmOtpButton" onclick="verifyOTP('teacher')">Submit OTP</button>
         </div>
     </div>
 
