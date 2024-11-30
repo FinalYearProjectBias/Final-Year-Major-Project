@@ -350,6 +350,7 @@ async function hideErrorAfterTimeout(element) {
    // Function to display approved teachers
    async function displayApprovedTeachers() {
        const approvedTeachers = await getApprovedMember('teacher');
+       
        const tbody = document.querySelector('#approvedTeachers tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -434,6 +435,7 @@ async function hideErrorAfterTimeout(element) {
    // Function to display pending staff
    async function displayStaff() {
     const staff = await getNotApprovedMember('staff');
+    console.log(staff);
        const tbody = document.querySelector('#staffTable tbody');
        tbody.innerHTML = ''; // Clear existing entries
    
@@ -473,7 +475,7 @@ async function hideErrorAfterTimeout(element) {
    // Function to display approved staff
 
    async function displayApprovedStaff() {
-        const approvedStaff = await getApprovedMember('teacher');
+        const approvedStaff = await getApprovedMember('staff');
        const tbody = document.querySelector('#approvedStaff tbody');
        tbody.innerHTML = ''; // Clear existing entries
     
