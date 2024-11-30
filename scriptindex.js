@@ -37,7 +37,12 @@ document.getElementById('index-form').addEventListener('submit', function(event)
             localStorage.setItem('user_id', JSON.stringify(data.user_data.user_id));
             localStorage.setItem('user_name', JSON.stringify(data.user_data.name));
             // You can redirect the user to another page (dashboard, etc.)
+            if(userType=='admin' || userType=='Grievance Member'){
+                window.location.href='/admin.html';
+            }
+            else{
             window.location.href = '/Login.html';
+            }
         } else {
             // Notify the user of login failure
             alert('Login failed: ' + data.detail);
