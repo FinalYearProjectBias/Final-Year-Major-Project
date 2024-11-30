@@ -11,54 +11,51 @@ function signOut() {
 }
 
 
-function handleFormSubmit(event) {
+async function handleFormSubmit(event) {
     event.preventDefault(); // Prevent default form submission
 
     // Collect form data
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const contactNumber = document.getElementById('contact-number').value;
-    const userType = document.getElementById('user-type').value; // Add a dropdown or field to capture user type
+    const userType = document.getElementById('user-type').value; // Capture user type
+    const userId = JSON.parse(localStorage.getItem('user_id'));
+     // Get user_id from localStorage
+    console.log(userId);
+    try {
+        // Send API request to update profile
+        const response = await fetch('https://backend-server-ohpm.onrender.com/api/update-profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                name: name,
+                email: email,
+                contact_number: contactNumber,
+                user_type: userType,
+            }),
+        });
 
-    // Determine the storage key based on the user type
-    const storageKey = getStorageKey(userType);
+        const data = await response.json();
+        console.log(data);
+        if (response.ok) {
+            // Show success message
 
-    // Retrieve the approved list from localStorage
-    const approvedUsers = JSON.parse(localStorage.getItem(storageKey)) || [];
+            // Hide the success message after 3 seconds
+            setTimeout(() => {
+                alert('Profile Updated Successfully');
+            }, 3000);
 
-    // Check if the user already exists in the approved list
-    const existingUserIndex = approvedUsers.findIndex(user => user.email === email);
-
-    // Prepare updated user data
-    const updatedUserData = {
-        name: name,
-        email: email,
-        mobile_no: contactNumber,
-        // Add any other fields as needed, such as gender, course, batch, etc.
-    };
-
-    // If the user exists, update their record; otherwise, show the custom alert
-    if (existingUserIndex > -1) {
-        approvedUsers[existingUserIndex] = { ...approvedUsers[existingUserIndex], ...updatedUserData };
-    } else {
-        showCustomAlert("Please Enter The Correct Email ID and User Type");
-        return; // Exit if the email is incorrect
+        } else {
+            // Handle errors from the server
+            alert(data.message || 'Failed to update profile. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        alert('An error occurred while updating the profile. Please try again later.');
     }
-
-    // Save the updated approved list back to localStorage
-    localStorage.setItem(storageKey, JSON.stringify(approvedUsers));
-
-    // Display success message
-    const successMessage = document.getElementById('edit-profile-success');
-    successMessage.style.display = 'block';
-
-    // Hide the success message after 3 seconds
-    setTimeout(() => {
-        successMessage.style.display = 'none';
-    }, 3000);
-
-    // Reset the form
-    document.getElementById('edit-profile-form').reset();
 }
 
 // Function to show the custom alert box in the center
@@ -296,141 +293,99 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-function checkPasswordStrength() {
-    const password = document.getElementById('new-password').value;
-    const strengthBars = document.querySelectorAll('.strength-bar');
-    const requirements = {
-        length: /(?=.{8,})/,
-        uppercase: /(?=.*[A-Z])/,
-        number: /(?=.*\d)/,
-        specialChar: /(?=.[!@#$%^&])/,
-    };
-
-    let strength = 0;
-    if (requirements.length.test(password)) strength++;
-    if (requirements.uppercase.test(password)) strength++;
-    if (requirements.number.test(password)) strength++;
-    if (requirements.specialChar.test(password)) strength++;
-
-    strengthBars.forEach((bar, index) => {
-        if (index < strength) {
-            bar.classList.add('strong');
-            bar.classList.remove('medium');
-        } else if (index === strength) {
-            bar.classList.add('medium');
-            bar.classList.remove('strong');
-        } else {
-            bar.classList.remove('medium', 'strong');
-        }
-    });
-
-    document.getElementById('length-requirement').classList.toggle('valid', requirements.length.test(password));
-    document.getElementById('uppercase-requirement').classList.toggle('valid', requirements.uppercase.test(password));
-    document.getElementById('number-requirement').classList.toggle('valid', requirements.number.test(password));
-    document.getElementById('special-char-requirement').classList.toggle('valid', requirements.specialChar.test(password));
-}
-function handlePasswordChange(event) {
+async function handlePasswordChange(event) {
     event.preventDefault();
 
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-    const userType = localStorage.getItem('loggedInUserType');
-    const loggedInEmail = localStorage.getItem('email'); // assuming email of logged user is saved on login
+    // Retrieve input values
+    const currentPassword = document.getElementById('current-password').value.trim();
+    const newPassword = document.getElementById('new-password').value.trim();
+    const confirmPassword = document.getElementById('confirm-password').value.trim();
+    const loggedInEmail =JSON.parse(localStorage.getItem('user_id'));  // Assuming logged-in email is stored in localStorage
     
-    console.log("User Type:", userType);
-    console.log("Logged In Email:", loggedInEmail);
-
-    // Validate passwords
+    const user_type=localStorage.getItem('user_type');
+    console.log(user_type)
+    // Validate inputs
     if (!validatePasswordChange(currentPassword, newPassword, confirmPassword)) {
         return; // Exit if validation fails
     }
 
-    let approvedListKey;
-    switch (userType) {
-        case "student":
-            approvedListKey = 'approvedStudents';
-            break;
-        case "teacher":
-            approvedListKey = 'approvedTeachers';
-            break;
-        case "staff":
-            approvedListKey = 'approvedStaff';
-            break;
-        default:
-            showNotification("Invalid user type!");
-            return;
+    try {
+        // API request to change the password
+        const response = await fetch('https://backend-server-ohpm.onrender.com/api/change-user-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: loggedInEmail,
+                password: currentPassword,
+                user_type: user_type,
+            }),
+        });
+
+        const data = await response.json();
+        console.log('API Response:', data);
+
+        if (response.ok) {
+            // Show success message
+            showNotification("Password changed successfully!");
+            document.getElementById("change-password-success").style.display = "block";
+
+            // Reset the form
+            resetPasswordForm();
+        } else {
+            // Handle errors from the server
+            const errorMessage = data;
+            console.log(data);
+            showNotification(errorMessage);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('An error occurred while changing the password. Please try again later.');
     }
-
-    // Get approved users list from localStorage
-    const approvedList = JSON.parse(localStorage.getItem(approvedListKey)) || [];
-
-    // Find the user by email
-    const userIndex = approvedList.findIndex(user => user.email === loggedInEmail);
-
-    if (userIndex === -1) {
-        alertshowNotification("User not found in approved list.");
-        return;
-    }
-
-    // Check if the current password is correct
-    if (approvedList[userIndex].password !== currentPassword) {
-        showNotification("Current password is incorrect!");
-        return;
-    }
-
-    // Update the password
-    approvedList[userIndex].password = newPassword;
-    localStorage.setItem(approvedListKey, JSON.stringify(approvedList));
-    showNotification("Password changed successfully!");
-    document.getElementById("change-password-success").style.display = "block";
-
-    // Clear the form
-    document.getElementById('current-password').value = '';
-    document.getElementById('new-password').value = '';
-    document.getElementById('confirm-password').value = '';
 }
 
+/**
+ * Validate the password change inputs.
+ * @param {string} currentPassword - The current password.
+ * @param {string} newPassword - The new password.
+ * @param {string} confirmPassword - The confirmation of the new password.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
 function validatePasswordChange(currentPassword, newPassword, confirmPassword) {
-    const passwordRequirements = {
-        minLength: 8,
-        hasUppercase: /[A-Z]/,
-        hasNumber: /[0-9]/,
-        hasSpecialChar: /[!@#$%^&*]/,
-    };
-
-    // Ensure new password is different from current password
-    if (currentPassword === newPassword) {
-        showNotification('New password cannot be the same as the current password.');
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showNotification("All fields are required!");
         return false;
     }
 
-    // Check new password strength
-    if (!passwordRequirements.hasUppercase.test(newPassword) ||
-        !passwordRequirements.hasNumber.test(newPassword) ||
-        !passwordRequirements.hasSpecialChar.test(newPassword) ||
-        newPassword.length < passwordRequirements.minLength) {
-            showNotification('New password does not meet the strength requirements.');
-        return false;
-    }
-
-    // Ensure new password and confirm password match
     if (newPassword !== confirmPassword) {
-        showNotification('New password and confirm password do not match.');
+        showNotification("New password and confirm password do not match!");
+        return false;
+    }
+
+    if (newPassword.length < 8) {
+        showNotification("New password must be at least 8 characters long!");
         return false;
     }
 
     return true;
+}
+
+/**
+ * Display a notification message.
+ * @param {string} message - The message to display.
+ */
+function showNotification(message) {
+    alert(message); // Replace this with a custom notification mechanism if desired
+}
+
+/**
+ * Reset the password form inputs.
+ */
+function resetPasswordForm() {
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {

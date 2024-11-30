@@ -36,6 +36,7 @@ document.getElementById('index-form').addEventListener('submit', function(event)
             console.log(data.user_data);
             localStorage.setItem('user_id', JSON.stringify(data.user_data.user_id));
             localStorage.setItem('user_name', JSON.stringify(data.user_data.name));
+            localStorage.setItem('user_type', JSON.stringify(data.user_data.user_type));
             // You can redirect the user to another page (dashboard, etc.)
             if(userType=='admin' || userType=='Grievance Member'){
                 window.location.href='/admin.html';
